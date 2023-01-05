@@ -1,0 +1,68 @@
+public partial class ThongKe : Window
+    {
+        public ThongKe()
+        {
+            InitializeComponent();
+        }
+        QlbanHang2Context dp = new QlbanHang2Context();
+
+        void ComboBox()
+        {
+            var loaisp = from loai in dp.LoaiSanPhams
+                         select loai;
+            LoaiSP_ComboBox.ItemsSource=loaisp.ToList();
+            LoaiSP_ComboBox.DisplayMemberPath= "TenLoai";
+            LoaiSP_ComboBox.SelectedValuePath = "MaLoai";
+            LoaiSP_ComboBox.SelectedIndex=0;
+        }
+        void Show_DataGrid()
+        {
+            var sanpham = from sp in dp.SanPhams
+                          join loai in dp.LoaiSanPhams on sp.MaLoai equals loai.MaLoai
+                          where sp.MaLoai == LoaiSP_ComboBox.SelectedValue.ToString()
+                          select new
+                          {
+                            sp.MaSp,
+                            sp.TenSp,
+                            loai.TenLoai,
+                            sp.DonGia,
+                            sp.SoLuong,
+                            ThanhTien = sp.DonGia * sp.SoLuong
+                          };
+            ThongKe_DataGrid.ItemsSource = sanpham.ToList();
+        }
+        private void Windew2_Loaded(object sender, RoutedEventArgs e)
+        {
+            ComboBox();
+            Show_DataGrid();
+        }
+
+        private void LoaiSP_ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Show_DataGrid();
+            /*
+            Sum.Content  = tổng số lượng sản phẩm 
+            Count.Content = tổng số đơn
+            Sum_money.Content = tổng số tiền thu về
+            */
+            var query = from sp in dp.SanPhams
+                        where sp.MaLoai == LoaiSP_ComboBox.SelectedValue.ToString()
+                        select sp;
+            List<SanPham> sanPham = new List<SanPham>(); 
+            sanPham = query.ToList();
+            int sumSl = 0, count = 0;
+            double sumMoney = 0;
+
+            foreach (SanPham item in sanPham)
+            {
+                sumSl = sumSl + item.SoLuong.Value;
+                count++;
+                sumMoney += (item.DonGia.Value * item.SoLuong.Value);
+            }
+
+            Sum.Content = sumSl;
+            Count.Content = count;
+            Sum_money.Content = sumMoney;
+        }
+    }
+}

@@ -1,0 +1,23 @@
+<DataGrid Name="ThongKe_DataGrid"
+                  AutoGenerateColumns="False"
+                  AlternatingRowBackground="AntiqueWhite"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False" Margin="128,98,128,27"
+                  IsReadOnly="True" SelectionChanged="ThongKe_DataGrid_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Mã SP" Binding="{Binding MaSp}"/>
+                <DataGridTextColumn Header="Tên SP" Binding="{Binding TenSp}" Width="150"/>
+                <DataGridTextColumn Header="Tên loại SP" Binding="{Binding TenLoai}" Width="150"/>
+                <DataGridTextColumn Header="Số lượng" Binding="{Binding SoLuong}"/>
+                <DataGridTextColumn Header="Đơn giá" Binding="{Binding DonGia}"/>
+                <DataGridTextColumn Header="Thành tiền" Binding="{Binding ThanhTien}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Label Content="Loại sản phẩm" HorizontalAlignment="Left" Margin="137,36,0,0" VerticalAlignment="Top"/>
+        <ComboBox Name="LoaiSP_ComboBox" HorizontalAlignment="Left" Margin="258,38,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="LoaiSP_ComboBox_SelectionChanged"/>
+        <Label Content="Tổng số lượng :" HorizontalAlignment="Left" Margin="469,18,0,0" VerticalAlignment="Top"/>
+        <Label Name="Sum"  Content="0" HorizontalAlignment="Left" Margin="557,18,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.126,-0.083"/>
+        <Label Content="Tổng số đơn :" HorizontalAlignment="Left" Margin="469,42,0,0" VerticalAlignment="Top"/>
+        <Label Content="Tổng tiền :" HorizontalAlignment="Left" Margin="469,67,0,0" VerticalAlignment="Top"/>
+        <Label Name="Count"  Content="0" HorizontalAlignment="Left" Margin="557,43,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.126,-0.083"/>
+        <Label Name="Sum_money"  Content="0" HorizontalAlignment="Left" Margin="557,67,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.126,-0.083"/>

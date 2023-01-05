@@ -1,0 +1,174 @@
+public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+        QlbanHang2Context dp = new QlbanHang2Context();
+        void ShowDataGrip()
+        {
+            var query = from sp in dp.SanPhams
+                        orderby sp.DonGia
+                        select new
+                        {
+                            sp.MaSp,
+                            sp.TenSp,
+                            sp.MaLoai,
+                            sp.SoLuong,
+                            sp.DonGia,
+                            ThanhTien = sp.DonGia * sp.SoLuong
+                        };
+            dsSanPham.ItemsSource = query.ToList();
+        }
+        void ComboBox()
+        {
+            var query = from tentl in dp.LoaiSanPhams select tentl;
+            LoaiSP_ComboBox.ItemsSource= query.ToList();
+            LoaiSP_ComboBox.DisplayMemberPath = "TenLoai";
+            LoaiSP_ComboBox.SelectedValuePath = "MaLoai";
+            LoaiSP_ComboBox.SelectedIndex= 0;
+        }
+        void Clean()
+        {
+            MaSp_TextBox.Clear();
+            TenSp_TextBox.Clear();
+            ComboBox();
+            DonGia_TextBox.Clear();
+            SoLg_TextBox.Clear();
+            ShowDataGrip();
+        }
+        void Reload()
+        {
+            ShowDataGrip();
+            Clean();
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ShowDataGrip();
+            Clean();
+        }
+        private void Clean_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Reload();
+        }
+        private void dsSanPham_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (dsSanPham.SelectedItems.Count >= 2)
+            {
+                MessageBox.Show("Vui lòng chỉ chọn 1 sản phẩm","Warning",MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else if (dsSanPham.SelectedItem != null)
+            {
+                try
+                {
+                    dynamic sp_selected = dsSanPham.SelectedItem;
+                    MaSp_TextBox.Text = sp_selected.MaSp;
+                    TenSp_TextBox.Text = sp_selected.TenSp;
+                    LoaiSP_ComboBox.SelectedValue = sp_selected.MaLoai;
+                    DonGia_TextBox.Text= sp_selected.DonGia.ToString();
+                    SoLg_TextBox.Text= sp_selected.SoLuong.ToString(); 
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Có lỗi khi chọn hàng" + ex.Message, "Error",MessageBoxButton.OK,MessageBoxImage.Error);
+                }
+            }
+        }
+        private void Add_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if(MaSp_TextBox==null || TenSp_TextBox==null || SoLg_TextBox==null || DonGia_TextBox == null)
+            {
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin","Thông báo !",MessageBoxButton.OK,MessageBoxImage.Information);
+            }
+            else
+            {
+                var sp = dp.SanPhams.SingleOrDefault(i=>i.MaSp ==MaSp_TextBox.Text);
+                if (sp != null)
+                {
+                    MessageBox.Show("Đã tồn tại mã sản phẩm", "Thông báo !", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    SanPham newsp = new SanPham();
+                    newsp.MaSp = MaSp_TextBox.Text;
+                    newsp.TenSp = TenSp_TextBox.Text;
+                    newsp.MaLoai = LoaiSP_ComboBox.SelectedValue.ToString();
+                    newsp.DonGia = float.Parse(DonGia_TextBox.Text);
+                    newsp.SoLuong = int.Parse(SoLg_TextBox.Text);
+
+                    dp.SanPhams.Add(newsp);
+                    dp.SaveChanges();
+                    MessageBox.Show("Thêm thành công","Thông báo !", MessageBoxButton.OK, MessageBoxImage.None);
+                    Reload();
+                }
+            }
+        }
+        private void Up_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (MaSp_TextBox == null)
+            {
+                MessageBox.Show("Vui lòng nhập  mã sản phẩm muốn sửa", "Thông báo !", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                var sp_sua = dp.SanPhams.SingleOrDefault(i=>i.MaSp == MaSp_TextBox.Text);
+                if (sp_sua != null)
+                {
+                    if (TenSp_TextBox.Text != "")
+                        sp_sua.TenSp= TenSp_TextBox.Text;
+                    if (LoaiSP_ComboBox.SelectedValue.ToString() != "")
+                        sp_sua.MaLoai= LoaiSP_ComboBox.SelectedValue.ToString();
+                    if (DonGia_TextBox.Text != "")
+                        sp_sua.DonGia = float.Parse(DonGia_TextBox.Text);
+                    if (SoLg_TextBox.Text != "")
+                        sp_sua.SoLuong = int.Parse(SoLg_TextBox.Text);
+                    dp.SaveChanges();
+                    MessageBox.Show("Sửa thành công", "Thông báo !", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Reload();
+                }
+                else MessageBox.Show("Ko tìm được sản phẩm muốn sửa", "Thông báo !", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
+        }
+
+        private void Del_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if(dsSanPham.SelectedItems == null)
+            {
+                MessageBox.Show("Vui lòng chọn sản phẩm muốn xóa", "Thông báo !", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                MessageBoxResult rs = MessageBox.Show("Xác nhận xóa ?", "Xác nhận", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                if(rs == MessageBoxResult.OK)
+                {
+                    dp.SanPhams.Remove(dp.SanPhams.SingleOrDefault(i=>i.MaSp==MaSp_TextBox.Text));
+                    dp.SaveChanges();
+                    MessageBox.Show("Xóa thành công", "Thông báo !", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Reload();
+                }
+            }
+        }
+
+        private void Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var sp_maloai = from sp in dp.SanPhams
+                            where sp.MaLoai == LoaiSP_ComboBox.SelectedValue.ToString()
+                            select new
+                            {
+                                sp.MaSp,
+                                sp.TenSp,
+                                sp.MaLoai,
+                                sp.DonGia,
+                                sp.SoLuong,
+                                ThanhTien = sp.DonGia * sp.SoLuong
+                            };
+            dsSanPham.ItemsSource= sp_maloai.ToList();
+        }
+
+        private void ThongKe_Button_Click(object sender, RoutedEventArgs e)
+        {
+            ThongKe windown2 = new ThongKe();
+            windown2.Show();
+        }
+    }
